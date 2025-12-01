@@ -26,3 +26,14 @@ echo "저장 완료: savedurl/$filename"
 
 #8 저장 완료 txt 열기
 xdg-open "savedurl/$filename"
+
+if grep -qi "microsoft" /proc/version 2>/dev/null; then
+    # WSL 환경
+    /mnt/c/Windows/System32/notepad.exe "savedurl/$filename"
+elif [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]]; then
+    # Git Bash 또는 Cygwin
+    notepad.exe "savedurl/$filename"
+else
+    # 리눅스는 기본 뷰어로
+    xdg-open "savedurl/$filename"
+fi
