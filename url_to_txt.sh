@@ -23,3 +23,6 @@ lynx -dump "$url" > "savedurl/$filename"
 
 #7 저장 완료 시 메시지 출력
 echo "저장 완료: savedurl/$filename"
+
+#8 저장 완료 txt 열기
+xdg-open "savedurl/$filename"
