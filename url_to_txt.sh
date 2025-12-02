@@ -3,11 +3,17 @@
 SAVE_DIR="/mnt/c/savedurl"
 mkdir -p "$SAVE_DIR"
 
+urldecode() {
+    local url_encoded="${1}"
+    echo -e "$(sed 's/+/ /g; s/%/\\x/g' <<< "${url_encoded}")"
+}
+
 #1 url 입력받기
 read -p "URL 입력: " url
 
 # PDF > TXT
 # 주소가 file:///c:/... 형태일 때
+
 
 if [[ "$url" == file://* ]]; then
     echo "PDF : $url"
@@ -18,17 +24,18 @@ if [[ "$url" == file://* ]]; then
 
     # Windows 경로 → WSL 경로(/mnt/c/~~)
     # 예: C:/Users/... → /mnt/c/Users/...
-    local_path="/mnt/c/${decoded_path#C:/}"
+    local_path=$(wslpath "decoded_path")
+    echo "WSL PDF Path: $local_path"
 
     # 파일 존재 확인
-    if [[ ! -f "$local_path" ]]; then
+    if test -! -f "$local_path"; then
         echo "로컬 파일을 찾을 수 없습니다: $local_path"
         exit 1
     fi
 
     # pdf 파일명 추출
     base=$(basename "$local_path")
-    filename="${base}.txt"
+    filename="${base%.*}.txt"
 
     # 중복 체크
     if [[ -f "$SAVE_DIR/$filename" ]]; then
@@ -40,9 +47,11 @@ if [[ "$url" == file://* ]]; then
     pdftotext "$local_path" "$SAVE_DIR/$filename"
     echo "PDF → 텍스트 변환 완료: $SAVE_DIR/$filename"
 
+    #윈도우경로로 변환
+    win_saved_path=$(wslpath -w "$SAVE_DIR/$FILENAME")
+    echo "저장된 텍스트 파일 경로 (Windows): $win_saved_path"
     # Windows에서 메모장으로 열기
-    /mnt/c/Windows/System32/notepad.exe "$(wslpath -w "$SAVE_DIR/$filename")"
-
+    notepad.exe "$win_saved_path"
     exit 0
 fi
 
